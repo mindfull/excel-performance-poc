@@ -3,8 +3,9 @@
 }
 
 .App-logo {
-  height: 40vmin;
+  height: 30vmin;
   pointer-events: none;
+  margin-bottom: 10vmin;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -24,8 +25,70 @@
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.App-generate {
+  font-size: 1rem;
+  margin-bottom: 1em;
+}
+
+.App-generate-amount {
+  width: 8em;
+  margin-left: 0.5em;
+  padding: 0.5em 1em;
+  font-feature-settings: "tnum";
+  color: #fff;
+  border: 2px solid #999;
+  border-radius: 0.5em;
+  background: none;
+  outline: 0;
+  transition: border-color 0.3s;
+}
+
+.App-generate-amount:hover {
+  border-color: #ccc;
+}
+
+.App-generate-amount:focus {
+  border-color: #fff;
+}
+
+.App-generate-button {
+  padding: 0.5em 1em;
+  font-weight: 500;
+  color: #fff;
+  border: 2px solid #555;
+  background-color: #555;
+  border-radius: 0 0.5em 0.5em 0;
+  outline: 0;
+  cursor: pointer;
+  transition: background-color 0.3s, border 0.3s;
+}
+
+.App-generate-button:hover {
+  border-color: #666;
+  background-color: #666;
+}
+
+.App-download {
+  padding: 1em 2em;
+  font-size: 1.25rem;
+  color: #fff;
+  background-color: #185c37;
+  border: 0;
+  border-radius: 0.5em;
+  cursor: pointer;
+  outline: 0;
+  box-shadow: 0 0.25em 0.5em rgba(0, 0, 0, 0.3);
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.App-download:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.App-download:not(:disabled):hover {
+  background-color: #18884f;
+  box-shadow: 0 0.4em 0.8em rgba(0, 0, 0, 0.5);
 }
 
 @keyframes App-logo-spin {
@@ -35,4 +98,66 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.App-spinner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-style: italic;
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.66);
+  backdrop-filter: blur(10px);
+}
+
+.App-spinner-icon {
+  width: 57px;
+  height: 57px;
+  margin-bottom: 1em;
+  animation: App-logo-spin infinite 1.5s linear;
+}
+
+.App-result-title {
+  width: 20rem;
+  margin: 3rem 0 1rem;
+  padding-top: 0.7rem;
+  font-size: 1rem;
+  text-transform: uppercase;
+  text-align: left;
+  border-top: 2px solid #fff;
+}
+
+.App-result {
+  width: 20rem;
+  margin: 0;
+  padding: 0;
+  padding-bottom: 0.7rem;
+  font-size: 1.25rem;
+  border-bottom: 1px solid #fff;
+}
+
+.App-result > div {
+  display: flex;
+}
+
+.App-result-label {
+  width: 12rem;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.App-result-data {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  text-align: right;
+  font-feature-settings: "tnum";
 }
