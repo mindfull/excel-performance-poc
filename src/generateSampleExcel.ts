@@ -49,11 +49,7 @@ const columns: Column[] = [
   },
 ];
 
-const generateSampleExcel = (data: Data[]) => {
-  const startTime = new Date().getTime();
-
-  const wb = xlsx.utils.book_new();
-
+const generateSheet = (year: number, month: number, data: Data[]) => {
   const SHEET_NAME = "1월_상세";
   const aoaData = [
     [],
@@ -102,8 +98,6 @@ const generateSampleExcel = (data: Data[]) => {
   ws[`G${statisticsRow}`] = { t: "n", f: `SUM(G${firstRow}:G${lastRow})` };
   ws[`I${statisticsRow}`] = { t: "n", f: `COUNTA(I${firstRow}:I${lastRow})` };
 
-  const sheetGeneratedTime = new Date().getTime();
-
   const defaultStyle: Style = {
     sz: 10,
     alignment: {
@@ -111,6 +105,21 @@ const generateSampleExcel = (data: Data[]) => {
     },
   };
   xlsx.utils.sheet_set_range_style(ws, `A3:J${lastRow}`, defaultStyle);
+
+  return {
+    SHEET_NAME,
+    ws,
+  };
+};
+
+const generateSampleExcel = (data: Data[]) => {
+  const startTime = new Date().getTime();
+
+  const wb = xlsx.utils.book_new();
+
+  const { ws, SHEET_NAME } = generateSheet(2020, 1, data);
+
+  const sheetGeneratedTime = new Date().getTime();
 
   xlsx.utils.book_append_sheet(wb, ws, SHEET_NAME);
 
