@@ -50,7 +50,7 @@ const columns: Column[] = [
 ];
 
 const generateSheet = (year: number, month: number, data: Data[]) => {
-  const SHEET_NAME = "1월_상세";
+  const SHEET_NAME = `${year}년_${month}월_상세`;
   const aoaData = [
     [],
     ["부가세 신고자료"],
@@ -112,16 +112,38 @@ const generateSheet = (year: number, month: number, data: Data[]) => {
   };
 };
 
+type SplittedData = Record<string, Data[]>;
+
 const generateSampleExcel = (data: Data[]) => {
   const startTime = new Date().getTime();
 
   const wb = xlsx.utils.book_new();
 
-  const { ws, SHEET_NAME } = generateSheet(2020, 1, data);
+  const splittedData: SplittedData = {};
+
+  // reduce 사용시 GC로 인한 퍼포먼스 저하가 예상되므로, for문을 사용합니다.
+  for (const row of data) {
+    const month = row.date.slice(0, 7);
+    if (splittedData[month]) {
+      splittedData[month] = [...splittedData[month], row];
+    } else {
+      splittedData[month] = [row];
+    }
+  }
+
+  Object.keys(splittedData).forEach((yearAndMonth) => {
+    const [year, month] = yearAndMonth
+      .split("-")
+      .map((stringifiedNumber) => Number(stringifiedNumber));
+    const { ws, SHEET_NAME } = generateSheet(
+      year,
+      month,
+      splittedData[yearAndMonth]
+    );
+    xlsx.utils.book_append_sheet(wb, ws, SHEET_NAME);
+  });
 
   const sheetGeneratedTime = new Date().getTime();
-
-  xlsx.utils.book_append_sheet(wb, ws, SHEET_NAME);
 
   xlsx.writeFile(wb, "부가세_정산내역.xlsx", {
     cellStyles: true,
