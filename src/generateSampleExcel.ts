@@ -1,4 +1,5 @@
 import xlsx, { Style } from "@sheet/core";
+import { format, lastDayOfMonth } from "date-fns";
 import type { Data } from "./generateData";
 
 interface Column {
@@ -52,22 +53,62 @@ const columns: Column[] = [
 const generateSheet = (year: number, month: number, data: Data[]) => {
   const SHEET_NAME = `${year}년_${month}월_상세`;
   const aoaData = [
+    ["", "", "", "", "", "", "", "", "", ""],
+    ["부가세 신고자료", "", "", "", "", "", "", "", "", ""],
+    ["(매출/매입)", "", "", "", "", "", "", "", "", ""],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      `집계기간: ${format(new Date(year, month - 1), "yyyy-MM-dd")} ~ ${format(
+        lastDayOfMonth(new Date(year, month - 1)),
+        "yyyy-MM-dd"
+      )}`,
+      "",
+    ],
     [],
-    ["부가세 신고자료"],
-    ["(매출/매입)"],
-    ["", "", "", "", "", "", "", "", "집계기간: 2020-01-01 ~ 2020-01-31"],
-    [],
-    [],
-    ["상점명", "Lorem Ipsum"],
-    ["사업자명", "김로렘"],
-    ["사업자등록번호", "123-45-67890"],
-    [],
-    ["오더 수"],
+    ["", "", "", "", "", "", "", "", "", ""],
+    ["상점명", "Lorem Ipsum", "", "", "", "", "", "", "", ""],
+    ["사업자명", "김로렘", "", "", "", "", "", "", "", ""],
+    ["사업자등록번호", "123-45-67890", "", "", "", "", "", "", "", ""],
+    ["", "", "", "", "", "", "", "", "", ""],
+    ["오더 수:", "", "", "", "", "", "", "", "", ""],
     columns.map(({ label }) => label),
     ...data.map((row) => columns.map(({ key }) => row[key])),
   ];
 
   const ws = xlsx.utils.aoa_to_sheet(aoaData);
+
+  const NUMBER_FORMAT = "#,##0";
+
+  // 기본 사이즈
+  ws["!sheetFormat"] = {
+    row: {
+      hpx: 24,
+    },
+    col: {
+      wpx: 96,
+    },
+  };
+  ws["!rows"] = [];
+  ws["!cols"] = [];
+
+  const firstRow = 13;
+  const lastRow = 13 + data.length;
+
+  const defaultStyle: Style = {
+    sz: 10,
+    alignment: {
+      horizontal: "center",
+      vertical: "center",
+    },
+  };
+  xlsx.utils.sheet_set_range_style(ws, `A3:J${lastRow}`, defaultStyle);
 
   // 제목 스타일링
   ws["!merges"] = [
@@ -83,13 +124,32 @@ const generateSheet = (year: number, month: number, data: Data[]) => {
     sz: 24,
     alignment: {
       horizontal: "center",
+      vertical: "center",
+    },
+  };
+  ws["I4"].s = {
+    sz: 9,
+    alignment: {
+      horizontal: "left",
     },
   };
 
+  ws["!cols"][0] = { wpx: 132 };
+  ws["!cols"][8] = { wpx: 114 };
+  ws["!rows"][1] = { hpx: 48 };
+  ws["!rows"][4] = { hpx: 7 };
+  ws["!rows"][5] = { hpx: 7 };
+
+  xlsx.utils.sheet_set_range_style(ws, "A5:J5", {
+    fgColor: { rgb: 0x000000 },
+  });
+
+  xlsx.utils.sheet_set_range_style(ws, "A7:A9", {
+    fgColor: { rgb: 0xd9d9d9 },
+  });
+
   // 통계 공식 삽입
   const statisticsRow = 11;
-  const firstRow = 13;
-  const lastRow = 13 + data.length;
   ws[`B${statisticsRow}`] = { t: "n", f: `COUNTA(B${firstRow}:B${lastRow})` };
   ws[`C${statisticsRow}`] = { t: "n", f: `SUM(C${firstRow}:C${lastRow})` };
   ws[`D${statisticsRow}`] = { t: "n", f: `SUM(D${firstRow}:D${lastRow})` };
@@ -98,13 +158,83 @@ const generateSheet = (year: number, month: number, data: Data[]) => {
   ws[`G${statisticsRow}`] = { t: "n", f: `SUM(G${firstRow}:G${lastRow})` };
   ws[`I${statisticsRow}`] = { t: "n", f: `COUNTA(I${firstRow}:I${lastRow})` };
 
-  const defaultStyle: Style = {
-    sz: 10,
+  xlsx.utils.sheet_set_range_style(ws, `A${statisticsRow}:B${statisticsRow}`, {
+    bold: true,
+    sz: 15,
     alignment: {
       horizontal: "center",
+      vertical: "center",
     },
-  };
-  xlsx.utils.sheet_set_range_style(ws, `A3:J${lastRow}`, defaultStyle);
+  });
+  xlsx.utils.sheet_set_range_style(ws, `C${statisticsRow}:J${statisticsRow}`, {
+    bold: true,
+    sz: 12,
+    color: { rgb: 0xffff00 },
+    fgColor: { rgb: 0x000000 },
+    alignment: {
+      horizontal: "center",
+      vertical: "center",
+    },
+    z: NUMBER_FORMAT,
+  });
+
+  const headerRow = 12;
+  xlsx.utils.sheet_set_range_style(ws, `A${headerRow}:J${headerRow}`, {
+    bold: true,
+    fgColor: { rgb: 0xd9d9d9 },
+  });
+
+  // 데이터 border 변경
+  aoaData.forEach((row, rowIndex) => {
+    row.forEach((_, colIndex) => {
+      const cell = ws[xlsx.utils.encode_cell({ r: rowIndex, c: colIndex })];
+      if (rowIndex < firstRow - 2) {
+        // 7번째 줄에서 9번째 줄은 흰색 border가 없어야 한다.
+        if (rowIndex >= 6 && rowIndex <= 8 && colIndex === 0) {
+          console.log(xlsx.utils.encode_cell({ r: rowIndex, c: colIndex }));
+          return;
+        }
+
+        const whiteBorderStyle = {
+          top: { style: "thin", color: { rgb: 0xffffff } },
+          right: { style: "thin", color: { rgb: 0xffffff } },
+          bottom: { style: "thin", color: { rgb: 0xffffff } },
+          left: { style: "thin", color: { rgb: 0xffffff } },
+        };
+        cell.s = cell.s
+          ? {
+              ...cell.s,
+              ...whiteBorderStyle,
+            }
+          : {
+              ...whiteBorderStyle,
+            };
+
+        return;
+      }
+
+      if (rowIndex < firstRow - 1) {
+        return;
+      }
+
+      const dottedStyle = {
+        top: { style: "dotted" },
+        right: { style: "dotted" },
+        bottom: { style: "dotted" },
+        left: { style: "dotted" },
+      };
+
+      cell.s = cell.s
+        ? {
+            ...cell.s,
+            ...dottedStyle,
+          }
+        : {
+            ...dottedStyle,
+          };
+      cell.z = colIndex === 7 ? "0.00%" : NUMBER_FORMAT;
+    });
+  });
 
   return {
     SHEET_NAME,

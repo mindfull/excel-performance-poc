@@ -1,4 +1,4 @@
-const paymentTypes = ["선불", "후불현금(VAN)", "후불카드(VAN"];
+const paymentTypes = ["선불", "후불현금(VAN)", "후불카드(VAN)"];
 
 export interface Data {
   orderNumber: string;
